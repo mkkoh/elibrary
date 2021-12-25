@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  <h1>
+    <%= title %>
+  </h1>
+  <p>Welcome to <%= title %>!</p>
+
+  <div>
+    <h3>Search Labels</h3>
+    <input type="search" id="searchLabelInput" name="searchLabelInput" placeholder="enter book/song or both (&)"
+      onkeyup="searchLabels(document.getElementById('searchLabelInput').value)">
+    <br><br>
+    <table id="resultTable"></table>
+    <br>
+  </div>
+
+  <div>
+    <h3>Add New</h3>
+    <form action="/add" method="post">
+
+      <label for="type">Book:</label>
+      <input type="radio" id="type" , name="type" value="book">
+
+      <label for="type">Song:</label>
+      <input type="radio" id="type" , name="type" value="song" required><br><br>
+
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" placeholder="required" required><br><br>
+
+      <label for="description">Description:</label>
+      <input type="text" id="description" name="description" placeholder="optional">
+
+      <br><br>
+      <input type="submit" value="Save">
+      <br><br>
+
+    </form>
+  </div>
+
+  <div>
+    <h3>Tag Label</h3>
+    <form action="/tag" method="post">
+
+      <label for="book">Tag book:</label>
+      <select name="book" id="book" class="artifact" required onchange="document.getElementById('song').required=null">
+        <option value="" selected disabled hidden>-</option>
+        <% books.forEach(function(book) { %>
+          <option value="<%= book.name %>">
+            <%= book.name %>
+          </option> %>
+          <% }) %>
+      </select>
+
+      <br><br>
+
+      <label for="song">Tag song:</label>
+      <select name="song" id="song" class="artifact" required onchange="document.getElementById('book').required=null">
+        <option value="" selected disabled hidden>-</option>
+        <% songs.forEach(function(song) { %>
+          <option value="<%= song.name %>">
+            <%= song.name %>
+          </option> %>
+          <% }) %>
+      </select>
+
+      <br><br>
+
+      <label for="label">With label:</label>
+      <select name="label" id="label" required=false>
+        <option value="" selected disabled hidden>-</option>
+        <% labels.forEach(function(label) { %>
+          <option value="<%= label.name %>">
+            <%= label.name %>
+          </option> %>
+          <% }) %>
+      </select>
+
+      <br><br>
+      <input type="reset" value="Reset" onclick="setTagRequired(document.getElementsByClassName('artifact'))">
+      <input type="submit" value="Tag">
+      <br><br>
+
+    </form>
+  </div>
+
+  <div>
+    <h3>Most Popular Labels</h3>
+    <table>
+      <% popular.forEach(function(label) { %>
+        <tr>
+          <td>
+            <%= label.name %>
+          </td>
+          <td>
+            (<%= label.count %>)
+          </td>
+        </tr>
+        <% }) %>
+    </table>
+  </div>
+
+</body>
+
+</html>
+
+<script type="text/javascript">
+  function searchLabels(query) {
+    if (window.timer) {
+      clearTimeout(window.timer)
+    }
+    window.timer = setTimeout(() => queryDb(query), 1000)
+  }
+
+  function queryDb(query) {
+    const xhr = new XMLHttpRequest()
+    xhr.open("POST", '/search', true)
+    xhr.setRequestHeader("Content-Type", "application/json")
+    xhr.onload = () => {
+      const array = JSON.parse(xhr.response)
+
+      if (array.length > 0) {
+        let content = `<tr><th>Label</th><th>Tagged Books/Songs</th></tr>`
+
+        array.map(row => {
+          content += `<tr><td>${row.name}</td><td>${row.search}</td></tr>`
+        })
+
+        document.getElementById('resultTable').innerHTML = content
+      } else {
+        document.getElementById('resultTable').innerHTML = 'No results found.'
+      }
+    }
+    xhr.send(JSON.stringify({ query }))
+  }
+
+  function setTagRequired(elements) {
+    for (const e of elements) {
+       e.required = true
+    }
+  }
+</script>
