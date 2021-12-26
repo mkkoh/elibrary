@@ -1,5 +1,7 @@
 ## eLibrary
 
-A simple webapp hacked together with Express, NodeJS, MySQL and containerized with Docker for portability.
+A simple webapp for adding books and songs and tagging them with labels.
 
-Just run `docker-compose up` to begin.
+Built with Express, NodeJS, MySQL and containerized with Docker for portability.
+
+Run `docker-compose up` to start.
